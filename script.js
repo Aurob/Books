@@ -5,7 +5,7 @@ function left(day){
             .then(function(response) {
             return response.json();
         }).then(function(myJson) {
-        url = JSON.stringify(myJson.url).replace('"','');
+        url = JSON.stringify(myJson.url).replace('"','').replace('"','');
         document.getElementById('img').src = url;
     });
 }
@@ -16,7 +16,7 @@ function right(day){
             .then(function(response) {
             return response.json();
         }).then(function(myJson) {
-        url = JSON.stringify(myJson.url).replace('"','');
+        url = JSON.stringify(myJson.url).replace('"','').replace('"','');
         document.getElementById('img').src = url;
     });
 }
