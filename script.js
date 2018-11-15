@@ -1,5 +1,5 @@
 function left(){
-    day = document.getElementById('day').innerHTML;
+    day = parseInt(document.getElementById('day').innerHTML);
     if(day <10){
         day = "0"+day;
     }
@@ -19,7 +19,7 @@ function left(){
     
 }
 function right(){
-    day = document.getElementById('day').innerHTML
+    day = parseInt(document.getElementById('day').innerHTML);
     if(day <10){
         day = "0"+day;
     }
