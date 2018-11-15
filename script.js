@@ -3,7 +3,7 @@ function left(){
     if(day <10){
         day = "0"+day;
     }
-    var url = 'https://api.nasa.gov/planetary/earth/imagery/?lon=100.75&lat=1.5&date=2017-'+day+'-01&cloud_score=True&api_key=DEMO_KEY'
+    var url = 'https://api.nasa.gov/planetary/earth/imagery/?lon=100.75&lat=1.5&date=2017-01-'+day+'&cloud_score=True&api_key=DEMO_KEYVJA4indt7zBEIj6P4wLp0UngsMQmhzqvDtMnh6f9'
     console.log("left\n"+day+"\n"+url);
     document.getElementById('info').innerHTML= new Date();
     fetch(url)
@@ -27,7 +27,7 @@ function right(){
     }
     console.log('left '+day);
     document.getElementById('info').innerHTML= new Date();
-    fetch('https://api.nasa.gov/planetary/earth/imagery/?lon=100.75&lat=1.5&date=2017-'+day+'-01&cloud_score=True&api_key=DEMO_KEY')
+    fetch('https://api.nasa.gov/planetary/earth/imagery/?lon=100.75&lat=1.5&date=2017-01-'+day+'&cloud_score=True&api_key=VJA4indt7zBEIj6P4wLp0UngsMQmhzqvDtMnh6f9')
             .then(function(response) {
             return response.json();
         }).then(function(myJson) {
