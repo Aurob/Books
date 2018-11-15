@@ -1,3 +1,3 @@
 function query(){
-document.getElementById('info').innerHTML= new Date();
+  document.getElementById('info').innerHTML= new Date();
 }
