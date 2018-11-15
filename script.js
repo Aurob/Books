@@ -1,15 +1,17 @@
 function left(){
-    day = parseInt(document.getElementById('day').innerHTML);
+    var day = parseInt(document.getElementById('day').innerHTML);
     if(day <10){
         day = "0"+day;
     }
-    console.log('left '+day);
+    var url = 'https://api.nasa.gov/planetary/earth/imagery/?lon=100.75&lat=1.5&date=2017-'+day+'-01&cloud_score=True&api_key=DEMO_KEY'
+    console.log("left\n"+day+"\n"+url);
     document.getElementById('info').innerHTML= new Date();
-    fetch('https://api.nasa.gov/planetary/earth/imagery/?lon=100.75&lat=1.5&date=2017-'+day+'-01&cloud_score=True&api_key=DEMO_KEY')
+    fetch(url)
             .then(function(response) {
             return response.json();
         }).then(function(myJson) {
         url = JSON.stringify(myJson.url).replace('"','').replace('"','');
+        console.log(url);
         document.getElementById('img').src = url;
     });
     if(day < 2){
@@ -19,7 +21,7 @@ function left(){
     
 }
 function right(){
-    day = parseInt(document.getElementById('day').innerHTML);
+    var day = parseInt(document.getElementById('day').innerHTML);
     if(day <10){
         day = "0"+day;
     }
