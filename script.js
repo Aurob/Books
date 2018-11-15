@@ -5,7 +5,7 @@ function left(day){
         .then(function(response) {
         return response.json();
     }).then(function(myJson) {
-    url = JSON.stringify(myJson).url;
+    url = JSON.stringify(myJson.url);
     document.getElementById('img').src = url;
   });
 }
