@@ -300,11 +300,10 @@ function zoom(e){
         //fileBoundary.style.left = bl - zm +'px';
         //fileBoundary.style.top = bt - zm +'px';
 
-        
-            
-
+        //Adjust the text font size when zooming
         //text = fileBoundary.children[0];
         //text.style.fontSize = bw*.1+'px';
+
         movBound(e); //Update everyone's client
     }
 }
