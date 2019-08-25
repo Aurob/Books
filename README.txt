@@ -5,8 +5,7 @@ when you see 'Running...' the application will be available in any browser at lo
 
 you can make your localhost public with ngrok
   execute ngrok.exe and enter 'http 10001' into the popup console
-    this will give you a url that you and others can join to view the 
-    running node script
+    this will give you a url that you and others can join to view the running node script
 
 running 'node noNode.js' will run without node
 
