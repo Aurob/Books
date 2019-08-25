@@ -13,7 +13,8 @@ running 'node noNode.js' will run without node
 in the browser:
   click on the box at the top left to move it, scroll to change the size
   drag an image from your computer, or an image from the browser into the box (png/jpg, gif only)
-    -Right click an image in a browser > View Image(or Open in New Tab), this opens the image directly
+    -Right click an image in a browser > View Image(or Open in New Tab), this opens the image directly 
     -Then drag the image into a box
+   images dragged onto the background will set the background of your client, others will not see this
   press 't' while holding a box to make text appear
   press '=' to create new boxes '-' to delete one that you are holding
