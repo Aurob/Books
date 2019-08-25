@@ -1,19 +1,6 @@
 var socket = io();
 var pako = window.pako;
 
-function zip(data, option){
-    if(option){ //zipping
-        var str = JSON.stringify(data);
-        var data = unescape(encodeURIComponent(str));
-        var resultAsBinString  = pako.deflate(data, { to: 'string' });
-        return resultAsBinString;
-    }else{
-        var uncompressed = pako.inflate(data, { to: 'string' });
-        var decoded = decodeURIComponent(escape(uncompressed));
-        return JSON.parse(decoded);
-    }
-}
-
 socket.on('init',(res)=>{
     console.log(res);
 });
@@ -21,19 +8,16 @@ socket.on('clientLeave', (id)=>{
     var allBnds = document.getElementsByTagName('div');
     for(div in allBnds){
         if(allBnds[div].id.startsWith(id)){
-            console.log('deleting');
             var bnd = get(allBnds[div].id);
             bnd.remove();
         }
     }
 });
 
-var playerBnds = {};
-var bnd;
+//This updates the client with others
 socket.on('update',(packet)=>{
-
     if(Object.keys(packet)[0].indexOf(socket.id) >-1){
-        console.log('ignoring');
+        //console.log('ignoring');
     }else{
         bnd = get(Object.keys(packet)[0]);
         if(!bnd){
@@ -57,7 +41,6 @@ socket.on('update',(packet)=>{
             bnd.children[0].style.fontSize = bw*.1+'px';
 
             if(packet[Object.keys(packet)][1]){
-                console.log("aklsjdnlksadjf");
                 bnd.children[0].innerText = packet[Object.keys(packet)][1];
                 bnd.children[0].contentEditeable = "false";
                 bnd.style.border = "";
@@ -75,11 +58,12 @@ socket.on('update',(packet)=>{
 
 socket.on('del',(id)=>{
     if(!(id.startsWith(socket.id))){
-        console.log(id);
         var bnd = get(id);
         bnd.remove();
     }
 });
+
+
 //HTML script init
 function runit(){  
     console.log("hello");
@@ -88,8 +72,8 @@ function runit(){
 }
 //
 
-canvas = get('main');
-context = canvas.getContext('2d');
+//canvas = get('main');
+//context = canvas.getContext('2d');
 var clicked;
 var cx = 0, cy = 0;
 var bndCanvas = [];
@@ -102,7 +86,7 @@ var bndClickX = 0, bndClickY = 0;
 var oobX = 0, oobY = 0;
 var scrollClick, oob;
 var clickNode;
-
+var zm = 0;
 var client = {};
 var zippedImg, zippedTxt;
 function movBound(e){
@@ -145,7 +129,7 @@ function boundaryHover(e){
     if(clicked && hoverNode==clickId){
         movBound(e);
     }
-
+    if(hoverNode) oob = false;
     if(clicked && !hoverNode){
         //console.log('oob');
         oobX = e.clientX;
@@ -166,7 +150,6 @@ function boundaryHover(e){
 }
 
 function boundaryClick(e){
-    console.log(e);
     if(e.button != 2){
 
 
@@ -186,7 +169,6 @@ function boundaryClick(e){
             
             b.style.zIndex = "-1"; //when not moving a boundary, move it to the back
         }else {
-            console.log(e); 
             clickNode = e;
             clickId = bndId(e);
             movBound(e);
@@ -205,15 +187,12 @@ function fileDrop(e, bg){
     e.stopPropagation();
     e.preventDefault();
     if(e.target.id.startsWith("_f")){
-        console.log(e);
         id = e.target.id;
         var items = e.dataTransfer.items;
         var files = e.dataTransfer.files;
 
         if(files.length > 0){
             if(files[0].type.startsWith('image')){
-                console.log(files[0]);
-                
                 let reader = new FileReader()
                 reader.readAsDataURL(files[0])
                 reader.onloadend = function() {
@@ -238,9 +217,13 @@ function fileDrop(e, bg){
                 reader.readAsText(files[0])
                 reader.onloadend = function() { 
                     var boundary = get(id);
-                    boundary.innerText = reader.result;
-                    boundary.fontSize = boundary.width*.1+'px'; 
-                    
+                    boundary.children[0].innerText = reader.result;
+                    boundary.children[0].style.height = "100%";
+                    boundary.children[0].style.width = "100%";
+                    boundary.children[0].style.zIndex = "0";
+                    boundary.children[0].style.fontSize = '12px';//boundary.width*.1+'px'; 
+                    boundary.style.overflowY = 'scroll';
+
                 }
             }
             bndImages.push(id);
@@ -297,40 +280,48 @@ var zooming = false;
 w = 0;
 var outOfBnd = false;
 function zoom(e){
-    var scrollLocation = (clicked) ? clickId : String(e.target.id);    
-    if(scrollLocation.startsWith('_f')){
-        fileBoundary = get(scrollLocation);
-        if(boundaries.indexOf(scrollLocation) > -1){
-            bw = fileBoundary.style.width;
-            bl = fileBoundary.style.left;
-            bt = fileBoundary.style.top;
-            bw = parseInt(String(bw).replace('px',''));
-            bl = parseInt(String(bl).replace('px',''));
-            
-            zm = 0;
-            (e.deltaY < 0) ? zm=10 : zm=-10;
-            
-            fileBoundary.style.width = zm+bw+'px';
-            fileBoundary.style.height = zm+bw+'px';
+    var scrollLocation = (clicked) ? clickId : e.target.id; 
 
-            text = fileBoundary.children[0];
-            text.style.fontSize = bw*.1+'px';
-            movBound(e);
-            //console.log(text);
-        }
-    }    
+    fileBoundary = get(scrollLocation);
+    if(boundaries.indexOf(scrollLocation) > -1){
+
+        //Removes 'px' from the value and returns an int. Is there a better method?
+        bt = parseInt(String(fileBoundary.style.top).replace('px',''));
+        bw = parseInt(String(fileBoundary.style.width).replace('px',''));
+        bl = parseInt(String(fileBoundary.style.left).replace('px',''));
+        
+        zm = 0;
+        (e.deltaY < 0) ? zm=10 : zm=-10;
+        
+        fileBoundary.style.width = zm+bw+'px';
+        fileBoundary.style.height = zm+bw+'px';
+
+        //Attempt to center the box around the cursor when zooming
+        //fileBoundary.style.left = bl - zm +'px';
+        //fileBoundary.style.top = bt - zm +'px';
+
+        
+            
+
+        //text = fileBoundary.children[0];
+        //text.style.fontSize = bw*.1+'px';
+        movBound(e); //Update everyone's client
+    }
 }
 //MISC helper functions
+
 //Shortname element retrieval
 function get(id){
     return document.getElementById(id);
 }
 
+//Returns the id of an element
 function bndId(node){
     var id = (node.target.id.startsWith('_f')) ? node.target.id : node.target.parentElement.id;
     return id;
 }
 
+//Simple string hash for storing values
 function hash(str){
     var hash = 0, i, chr;
     if (str.length === 0) return hash;
@@ -342,28 +333,41 @@ function hash(str){
     }
     return hash;
   }
+
+  //Compression and decompression : zip(string, true) 'true' to compress, zip(string, false) 'false' to decompress
+  function zip(data, option){
+    if(option){ //zipping
+        var str = JSON.stringify(data);
+        var data = unescape(encodeURIComponent(str));
+        var resultAsBinString  = pako.deflate(data, { to: 'string' });
+        return resultAsBinString;
+    }else{ //unzipping
+        var uncompressed = pako.inflate(data, { to: 'string' });
+        var decoded = decodeURIComponent(escape(uncompressed));
+        return JSON.parse(decoded);
+    }
+}
 //
 
 //Events
 //Scrolling
 window.addEventListener('wheel',(zoom));
 
-//window.addEventListener('mousedown', (resize));
-//window.addEventListener('mouseup', (resize));
-
 //For tracking mouse location and boundary dragging
 window.addEventListener('mousemove',(e)=> {
     (e.target.id!='' || clicked) ? boundaryHover(e) : '';
-    
 }); 
+
 window.addEventListener('click',(e)=> {
-    // boundaryClick(e)
-    id = (e.target.id=='') ? '' : bndId(e);
-    e = (clicked && id=='') ? clickNode : e;//OPTIMIZE THIS
-    id = (clicked && id=='') ? clickId : id;//OPTIMIZE THIS
+
+    if(e.target.id == ''){
+        if(clicked){
+            e = clickNode;
+            id = clickId;
+        }
+    }else id = bndId(e);
 
     (id!='' && id.startsWith('_f')) ? boundaryClick(e) : '';
-    //(e.target.id!='') ? boundaryClick(e) : (String(e).indexOf('Para') >-1) ? console.log('123') : boundaryClick(e);
 });
 
 //For handling file drops
@@ -377,6 +381,5 @@ window.addEventListener('keypress',(e)=>{
     (e.key=='=') ? addBoundary(false) : '';
     (e.key=='-' && clicked) ? deleteBoundary(e) : '';
     (e.key=='t') ? bndText(e) : '';
-    
-    
+
 });

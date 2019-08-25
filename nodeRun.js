@@ -11,18 +11,10 @@ app.get('/*', function(req, res){
   res.sendFile('index.html', { root: __dirname });
 });
 
-var moving = [];
 function init(socket){
   socket.emit('init',true);
   socket.on('bndMove', function(packet){
-    //moving.push(packet);
     io.emit('update', packet);
-    // (socket.id in ims) ? '' : ims[socket.id] = [];
-    // if(childs[1]!='' && ims[sid].indexOf(hash(childs[1]) <0)){
-    //   ims[sid].push(hash(childs[1]));      
-    // } 
-    // //console.log(sid, id, childs[1], loc);
-    // newIm = (hash(childs[1]) in ims[sid]) ? false:true;
   });
   socket.on('del', function(id){
     io.emit('del', id);
@@ -32,6 +24,7 @@ function init(socket){
   });
 }
 
+//Eventual batch client update, better performance but less fluid clientside
 // setInterval(()=>{
 //   if(moving.length > 0){
 //     console.log('Sending '+moving.length+' updates');
