@@ -1,4 +1,7 @@
-install nodejs
+install nodejs then run "npm install [libraryname]" to install libraries
+  two libraries are needed, "socketio" (asynchronous sockets) and "pako" (zlib commpression)
+  i.e "npm install socketio" and "npm install pako"
+ 
 navigate to this directory('../maybeArt/jsArt/') from a command line
 type node nodeRun.js
 when you see 'Running...' the application will be available in any browser at localhost:10001
