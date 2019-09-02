@@ -399,25 +399,18 @@ window.addEventListener('wheel',(zoom));
 
 //For tracking mouse location and boundary dragging
 window.addEventListener('mousemove',(e)=> {
-    if(mouseUp){
-        if(e.target.id)
-        mouseUp = false;
-    }
     (e.target.id!='' || clicked) ? boundaryHover(e) : '';
 }); 
 
-window.addEventListener('mouseup', (e)=>{
-    //console.log(e);
-    //mouseUp = true;
-});
 document.addEventListener('click',(e)=> {
-    if(e.target.id == ''){
-        if(clicked){
-            e = clickNode;
-            id = clickId;
-        }
-    }else id = bndId(e);
-    (id!='' && id.startsWith('_f')) ? boundaryClick(e) : '';
+    //If the cursor is clicked and out of bounds of a box, the event target will be main HTML
+    //Set the event target to the clicked box element
+    if(clicked && e.target.id == ''){
+        e = clickNode;
+        id = clickId;
+    }
+
+    (e.target.id!='') ? boundaryClick(e) : '';
 });
 
 //For handling file drops
@@ -428,29 +421,29 @@ window.addEventListener('drop', (e)=> {
 
 //For creating and deleting boundaries
 window.addEventListener('keypress',(e)=>{
-    (e.key=='=') ? addBoundary(false) : '';
-    (e.key=='-' && clicked) ? deleteBoundary(e) : '';
-    (e.keyCode==13 && clicked) ? setLink(e) : '';
-    //(e.key=='t') ? bndText(e) : '';
+    (e.key=='=') ? addBoundary(false) : ''; //Add new box
+    (e.key=='-' && clicked) ? deleteBoundary(e) : ''; //Delete a held box
+    (e.keyCode==13 && clicked) ? setLink(e) : ''; //Load iframe with current box text
 
 });
-var test;
-const a = document.getElementById("b");
-const config = {attributes: true, childList: true, subtree: true, attributeOldValue : true};
 
-const domChange = (mutationsList,observer)=>{
-    
+//This utilizes observers to detect when a DOM change occurs
+//It can be used to undo unauthorized changes to the DOM like ID changes
 
-    //console.log(mutationsList,observer.attributeOldValue);
-    var spans = [];
-    if(!idChanged){
-        for(let mutation of mutationsList){
-            if(mutation.attributeName == 'id' && mutation.oldValue){
-                idChanged = true;
-                mutation.target.id = mutation.oldValue;
-            }
-        }
-    }else idChanged = false;
-};
-const observer = new MutationObserver(domChange);
-observer.observe(a, config);
+// const a = document.getElementById("b");
+// const config = {attributes: true, childList: true, subtree: true, attributeOldValue : true};
+
+// const domChange = (mutationsList,observer)=>{
+//     //console.log(mutationsList,observer.attributeOldValue);
+//     var spans = [];
+//     if(!idChanged){
+//         for(let mutation of mutationsList){
+//             if(mutation.attributeName == 'id' && mutation.oldValue){
+//                 idChanged = true;
+//                 mutation.target.id = mutation.oldValue;
+//             }
+//         }
+//     }else idChanged = false;
+// };
+// const observer = new MutationObserver(domChange);
+// observer.observe(a, config);
