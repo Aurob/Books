@@ -337,6 +337,21 @@ function zoom(e){
     }
 }
 
+function setLink(e){
+    
+    var b = get(bndId(e));
+    console.log(b.childNodes[1].innerHTML);
+    if(b.childNodes[1].innerHTML.indexOf(".youtube.com/") > -1){
+        var frame = document.createElement("span");
+        frame.className = "can";
+        frame.id = b.id+"_";
+        frame.innerHTML = '<iframe width="853" height="480" src="https://www.youtube.com/embed/PAFqOpdZ0rk"\
+                           frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope;\
+                           picture-in-picture" allowfullscreen></iframe>';
+        b.appendChild(frame); 
+    }
+    
+};
 //MISC helper functions
 
 //Shortname element retrieval
@@ -415,7 +430,8 @@ window.addEventListener('drop', (e)=> {
 window.addEventListener('keypress',(e)=>{
     (e.key=='=') ? addBoundary(false) : '';
     (e.key=='-' && clicked) ? deleteBoundary(e) : '';
-    (e.key=='t') ? bndText(e) : '';
+    (e.keyCode==13 && clicked) ? setLink(e) : '';
+    //(e.key=='t') ? bndText(e) : '';
 
 });
 var test;
