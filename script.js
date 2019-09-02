@@ -16,9 +16,11 @@ socket.on('clientLeave', (id)=>{
 
 //This updates the client with others
 socket.on('update',(packet)=>{
+    
     if(Object.keys(packet)[0].indexOf(socket.id) >-1){
         //console.log('ignoring');
     }else{
+        console.log(packet);
         bnd = get(Object.keys(packet)[0]);
         if(!bnd){
             addBoundary(Object.keys(packet)[0]);
@@ -33,9 +35,13 @@ socket.on('update',(packet)=>{
             bnd.style.top = packet[Object.keys(packet)][0][1];
             bnd.style.width = packet[Object.keys(packet)][0][2];
             bnd.style.height = packet[Object.keys(packet)][0][3];
-            
-            bnd.style.zIndex = '-1';
+            bnd.childNodes[0].innerHTML=packet[Object.keys(packet)][1];
+            bnd.style.zIndex = '0';
             bnd.style.pointerEvents = false;
+            console.log(bnd.childNodes[0]);
+            //bnd.childNodes[0].style.height = "100%";
+            //bnd.childNodes[0].style.width = "100%";
+            bnd.childNodes[0].contentEditeable = false;
 
             bw = parseInt(String(bnd.style.width).replace('px',''));
             bnd.children[0].style.fontSize = bw*.1+'px';
@@ -72,8 +78,8 @@ function runit(){
 }
 //
 
-//canvas = get('main');
-//context = canvas.getContext('2d');
+canvas = get('main');
+context = canvas.getContext('2d');
 var clicked;
 var cx = 0, cy = 0;
 var bndCanvas = [];
@@ -89,20 +95,24 @@ var clickNode;
 var zm = 0;
 var client = {};
 var zippedImg, zippedTxt;
-function movBound(e){
-    
-    var b = (clickId) ? get(clickId) : get(e.target.id);
+var idChanged = false;
+var mouseUp;
 
+function movBound(e){
+     var b = (clickId) ? get(clickId) : get(e.target.id);
+    var bw = parseInt(String(b.style.width).replace('px',''));
+    var bh = parseInt(String(b.style.height).replace('px',''));
     var text = b.children[0].innerText;
     var img = b.children[1].src;
     b.style.position ='absolute';
+
     if(bndClickX != 0 && bndClickY !=0){
-        b.style.left = (e.x)-(bndClickX)+'px';//-(b.clientWidth/3)+'px';
-        b.style.top = (e.y)-(bndClickY)+'px';//-(b.clientHeight/3)+'px';
+        b.style.left = ((e.x)-bndClickX)+'px';//-(b.clientWidth/3)+'px';
+        b.style.top = ((e.y)-bndClickY)+'px';//-(b.clientHeight/3)+'px';
     }
 
     if(b.id in client){
-        if(text != '' && hash(text) != client[b.id][0]){
+        if(text != '' ){//&& hash(text) != client[b.id][0]
             client[b.id][0] = hash(text);
             newTxt = text;//zip(text,true);
         }else newTxt = false;
@@ -116,13 +126,13 @@ function movBound(e){
         newTxt = text;//zip(text, true); 
         newImg = zip(img, true);
     }
-
     bndLoc = [b.style.left,b.style.top,b.style.width,b.style.height];
     var packet = {[socket.id + b.id] : [bndLoc, newTxt, newImg, del]};
     socket.emit('bndMove', packet);   
 }
 
 function boundaryHover(e){
+    
     //console.log("Hovering in "+e.target.id);
     var hoverNode = (e.target.id=='') ? false : bndId(e);
 
@@ -155,9 +165,10 @@ function boundaryClick(e){
 
         var b = get(bndId(e));
         if(clicked){
+            console.log(e);
             clicked = false;
-            bndClickX = 0;
-            bndClickY = 0;
+            //bndClickX = 0;
+            //bndClickY = 0;
             clickId = '';
             if(bndImages.indexOf(bndId(e)) < 0){
                 b.style.borderColor = "black";
@@ -166,18 +177,27 @@ function boundaryClick(e){
                 b.style.border = '';
                 b.style.cursor = 'grab';
             }
-            
+            b.pointerEvents = false;
+
             b.style.zIndex = "-1"; //when not moving a boundary, move it to the back
         }else {
             clickNode = e;
             clickId = bndId(e);
-            movBound(e);
             b.style.border = "solid";
             b.style.borderColor = "red";
             b.style.zIndex = "0";
             b.style.cursor = 'grabbing';
-            bndClickX = e.layerX;
-            bndClickY = e.layerY;
+            b.pointerEvents = false;
+            var bw = parseInt(String(b.style.left).replace('px',''))
+            var bh = parseInt(String(b.style.top).replace('px',''))
+            
+
+            
+            bndClickX = Math.abs(bw - (e.x));
+
+            bndClickY = Math.abs(bh - (e.y));
+
+            console.log(b.clientWidth+','+b.clientHeight+' - '+e.x+','+e.y+' - '+bndClickX+','+bndClickY+' - '+bw+','+bh);
             clicked = true;
         }
     }
@@ -247,6 +267,9 @@ function fileDrop(e, bg){
     }
 }
 
+function px2i(px){
+    return parseInt(String(px).replace('px',''));
+}
 function bndText(e){
     var boundary = get(clickId);
     boundary.childNodes[1].innerText = 'text here';
@@ -266,10 +289,13 @@ function addBoundary(boundId){
     var boundId = (boundId) ? boundId : "_f"+boundCnt;
     board = get('board');
     board.innerHTML += 
-        "<div class='fz' id='"+boundId+"' style='border:solid;width:25px;height:25px;'>\
-        <p id='"+boundId+"' contenteditable='true' style='font-size:.1px; word-wrap:break-word;'></p>\
+        "<span class='fz' id='"+boundId+"' style='border:solid;width:25px;height:25px;'>\
+        <p id='"+boundId+"' contenteditable='true' style='width:100%; height:100%; font-size:.1px; word-wrap:break-word;'></p>\
         <img id='"+boundId+"'/>\
-        </div>";
+        </span>";
+    var b = get(boundId);
+    b.style.top = '0px';
+    b.style.left = '0px';
     boundaries.push(boundId);
     boundCnt++;
     return boundId;
@@ -283,7 +309,7 @@ function zoom(e){
     var scrollLocation = (clicked) ? clickId : e.target.id; 
 
     fileBoundary = get(scrollLocation);
-    if(boundaries.indexOf(scrollLocation) > -1){
+    if(clicked && boundaries.indexOf(scrollLocation) > -1){
 
         //Removes 'px' from the value and returns an int. Is there a better method?
         bt = parseInt(String(fileBoundary.style.top).replace('px',''));
@@ -295,18 +321,22 @@ function zoom(e){
         
         fileBoundary.style.width = zm+bw+'px';
         fileBoundary.style.height = zm+bw+'px';
-
+        
+        bndClickX += zm/2;
+        bndClickY += zm/2;
+        
         //Attempt to center the box around the cursor when zooming
         //fileBoundary.style.left = bl - zm +'px';
-        //fileBoundary.style.top = bt - zm +'px';
+        fileBoundary.style.top = bt - zm +'px';
 
         //Adjust the text font size when zooming
-        //text = fileBoundary.children[0];
-        //text.style.fontSize = bw*.1+'px';
-
-        movBound(e); //Update everyone's client
+        text = fileBoundary.children[0];
+        text.style.fontSize = bw*.1+'px';
+        if(clicked) movBound(e);
+        //movBound(e); //Update everyone's client
     }
 }
+
 //MISC helper functions
 
 //Shortname element retrieval
@@ -354,18 +384,24 @@ window.addEventListener('wheel',(zoom));
 
 //For tracking mouse location and boundary dragging
 window.addEventListener('mousemove',(e)=> {
+    if(mouseUp){
+        if(e.target.id)
+        mouseUp = false;
+    }
     (e.target.id!='' || clicked) ? boundaryHover(e) : '';
 }); 
 
-window.addEventListener('click',(e)=> {
-
+window.addEventListener('mouseup', (e)=>{
+    //console.log(e);
+    //mouseUp = true;
+});
+document.addEventListener('click',(e)=> {
     if(e.target.id == ''){
         if(clicked){
             e = clickNode;
             id = clickId;
         }
     }else id = bndId(e);
-
     (id!='' && id.startsWith('_f')) ? boundaryClick(e) : '';
 });
 
@@ -382,3 +418,23 @@ window.addEventListener('keypress',(e)=>{
     (e.key=='t') ? bndText(e) : '';
 
 });
+var test;
+const a = document.getElementById("b");
+const config = {attributes: true, childList: true, subtree: true, attributeOldValue : true};
+
+const domChange = (mutationsList,observer)=>{
+    
+
+    //console.log(mutationsList,observer.attributeOldValue);
+    var spans = [];
+    if(!idChanged){
+        for(let mutation of mutationsList){
+            if(mutation.attributeName == 'id' && mutation.oldValue){
+                idChanged = true;
+                mutation.target.id = mutation.oldValue;
+            }
+        }
+    }else idChanged = false;
+};
+const observer = new MutationObserver(domChange);
+observer.observe(a, config);
