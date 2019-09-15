@@ -38,7 +38,7 @@ socket.on('update',(packet)=>{
             bnd.childNodes[0].innerHTML=packet[Object.keys(packet)][1];
             bnd.style.zIndex = '0';
             bnd.style.pointerEvents = false;
-            console.log(bnd.childNodes[0]);
+            //console.log(bnd.childNodes[0]);
             //bnd.childNodes[0].style.height = "100%";
             //bnd.childNodes[0].style.width = "100%";
             bnd.childNodes[0].contentEditeable = false;
@@ -99,7 +99,7 @@ var idChanged = false;
 var mouseUp;
 
 function movBound(e){
-     var b = (clickId) ? get(clickId) : get(e.target.id);
+    var b = (clickId) ? get(clickId) : get(e.target.id);
     var bw = parseInt(String(b.style.width).replace('px',''));
     var bh = parseInt(String(b.style.height).replace('px',''));
     var text = b.children[0].innerText;
@@ -165,7 +165,7 @@ function boundaryClick(e){
 
         var b = get(bndId(e));
         if(clicked){
-            console.log(e);
+            //console.log(e);
             clicked = false;
             //bndClickX = 0;
             //bndClickY = 0;
@@ -197,7 +197,7 @@ function boundaryClick(e){
 
             bndClickY = Math.abs(bh - (e.y));
 
-            console.log(b.clientWidth+','+b.clientHeight+' - '+e.x+','+e.y+' - '+bndClickX+','+bndClickY+' - '+bw+','+bh);
+            //console.log(b.clientWidth+','+b.clientHeight+' - '+e.x+','+e.y+' - '+bndClickX+','+bndClickY+' - '+bw+','+bh);
             clicked = true;
         }
     }

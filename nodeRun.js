@@ -7,8 +7,8 @@ var myParser = require("body-parser");
 var pako = require('pako'); //Compression
 
 app.use(express.static(__dirname));
-app.get('/*', function(req, res){
-  res.sendFile('index.html', { root: __dirname });
+app.get('/projects', function(req, res){
+  res.sendFile('home.html', { root: __dirname });
 });
 
 function init(socket){
@@ -45,4 +45,4 @@ function hash(str){
 }
 
 io.on('connection',init);
-http.listen(10001, ()=>{console.log("Running...")});
+http.listen(8080, ()=>{console.log("Running...")});
